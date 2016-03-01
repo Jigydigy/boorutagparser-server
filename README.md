@@ -2,6 +2,8 @@
 
 Saves requests from https://github.com/jetboom/boorutagparser as file/tag list pairs for extremely easy bulk import of tagged items in to Hydrus Network.
 
+![](https://raw.githubusercontent.com/JetBoom/boorutagparser-server/master/boorutagparser-server.jpg)
+
 ## Usage
 
 ### Windows
@@ -14,7 +16,7 @@ Saves requests from https://github.com/jetboom/boorutagparser as file/tag list p
 
 You can also just use "npm install boorutagparser-server" if you prefer.
 
-### Linux
+### Linux (Debian-based)
 
 ```text
 curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
