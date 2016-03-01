@@ -1,2 +1,3 @@
-npm install request
-npm install cloudscraper
+start npm install request ^&^& exit
+
+start npm install cloudscraper ^&^& exit
