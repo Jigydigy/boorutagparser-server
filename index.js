@@ -84,6 +84,13 @@ function handleRequest(req, response)
 	});
 }
 
+try {
+	fs.mkdirSync("./import_me");
+}
+catch (e) {
+	console.log("warning: couldn't make import_me directory");
+}
+
 var server = http.createServer(handleRequest);
 server.listen(PORT, 'localhost', 511, function() {
 	console.log("boorutagparser-server listening on localhost:%s", PORT);
