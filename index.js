@@ -2,12 +2,14 @@ var http = require('http');
 var fs = require('fs');
 var crypto = require('crypto');
 
+var cloudscraper;
 var request;
 try {
 	request = require('request');
+	cloudscraper = require('cloudscraper');
 }
 catch (e) {
-	console.log('\'request\' library not found - did you run install_modules.bat or install_modules.sh?');
+	console.log('some libraries were not found - did you run install_modules.bat or install_modules.sh?');
 	process.exit(1);
 	return;
 }
@@ -61,19 +63,49 @@ function handleRequest(req, response)
 
 			body = body.replace(/,/g, "\r\n");
 
-			var filename = args.replace(/\.\./, '').replace(/^.*[\\\/]/, '');
+			var filename = args.replace(/\.\./, '').replace(/^.*[\\\/]/, '').replace(/\?.+/, '');
 
 			// There's some rediculously long file names out there and some boorus have collisions if images have identical tags.
 			// hydrus ruins the file name and ignores duplicates anyway so who cares if I do this.
 			var filesplit = filename.split('.');
 			var fileext = filesplit.pop();
 			var filenamenoext = filesplit.pop();
-			//if (filenamenoext.match(/[^a-f0-9]/i))
-				filename = crypto.createHash('md5').update(args).digest("hex") + '.' + fileext;
+			filename = crypto.createHash('md5').update(args).digest("hex") + '.' + fileext;
 
 			var txtfilename = filename + '.txt';
 
-			request(args).pipe(fs.createWriteStream('./import_me/' + filename)).on('close', function() { console.log('wrote %s', filename); });
+			// Just in case people have user agent checking.
+			var headers = {
+			    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36'
+			}
+
+			var options = {
+			    url: args,
+			    method: 'GET',
+			    headers: headers
+			}
+
+			cloudscraper.request(
+				{
+					method: 'GET',
+                	url:args,
+                	encoding: null,
+                },
+                function(err, response, rbody) {
+                	if (err)
+                	{
+                		console.log('cloudflare scraper error!');
+                		console.log(err);
+                	}
+                	else
+						fs.writeFile('./import_me/' + filename, rbody, null, function(err, w, b) { if (err == null) console.log('wrote %s', filename); });
+				}
+			);
+
+			/*request(args)
+			.pipe(fs.createWriteStream('./import_me/' + filename))
+			.on('close', function() { console.log('wrote %s', filename); });*/
+
 			if (body.length > 0)
 				fs.writeFile('./import_me/' + txtfilename, body, 'utf8', function(err, w, b) { if (err == null) console.log('wrote %s', txtfilename); });
 

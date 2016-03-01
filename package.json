@@ -1,10 +1,11 @@
 {
   "name": "boorutagparser-server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Saves requests from github.com/jetboom/boorutagparser as file/tag list pairs for extremely easy bulk import of tagged items in to Hydrus Network.",
   "main": "index.js",
   "dependencies": {
-    "request": "^2.69.0"
+    "request": "^2.69.0",
+    "cloudscraper": "*"
   },
   "devDependencies": {},
   "scripts": {
