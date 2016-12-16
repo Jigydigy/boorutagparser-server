@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var crypto = require('crypto');
+var urlparse = require('url').parse;
 
 var cloudscraper;
 var request;
@@ -21,60 +22,37 @@ const PORT = 14007;
 
 function handleRequest(req, response)
 {
-	var url = req.url;
-
 	if (req.method != 'POST')
 		return response.end('error');
 
 	var body = '';
-
 	req.on('data', function(data) {
 		body += data;
-
-		/*if (body.length > 1e6)
-			req.connection.destroy();
-		});*/
 	});
 
 	req.on('end', function() {
-		//var data = querystring.parse(body);
-		var url = req.url.replace(/\/$/, '').replace(/^\//, '');
+		var url = urlparse(req.url, true);
+		var download = url.query.url;
+		var referer = url.query.referer;
+		var cmd = url.pathname.substring(1);
 
-		console.log(url);
-
-		var cmd;
-		var args;
-
-		var sep = url.indexOf('\?');
-		if (sep >= 0)
+		if (cmd === "download")
 		{
-			cmd = url.substr(0, sep);
-			args = url.substr(sep + 1, url.length - 1);
-		}
-		else
-		{
-			cmd = req.url;
-			args = '';
-		}
-
-		if (cmd == 'download')
-		{
-			//console.log('req: %s', url);
 			console.log('cmd: %s', cmd);
-			console.log('args: %s', args);
-			//console.log('body:\n%s', body);
+			console.log('referer: %s', referer);
+			console.log('download: %s', download);
 
 			body = entities.decode(body);
 			body = body.replace(/,/g, "\r\n");
 
-			var filename = args.replace(/\.\./, '').replace(/^.*[\\\/]/, '').replace(/\?.+/, '');
+			var filename = download.replace(/\.\./, '').replace(/^.*[\\\/]/, '').replace(/\?.+/, '');
 
 			// There's some rediculously long file names out there and some boorus have collisions if images have identical tags.
 			// hydrus ruins the file name and ignores duplicates anyway so who cares if I do this.
 			var filesplit = filename.split('.');
 			var fileext = filesplit.pop();
 			var filenamenoext = filesplit.pop();
-			filename = crypto.createHash('md5').update(args).digest("hex") + '.' + fileext;
+			filename = crypto.createHash('md5').update(download).digest("hex") + '.' + fileext;
 
 			var txtfilename = filename + '.txt';
 
@@ -83,18 +61,19 @@ function handleRequest(req, response)
 			    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36'
 			}
 
-			var options = {
-			    url: args,
-			    method: 'GET',
-			    headers: headers
+			if (typeof referer !== "undefined")
+			{
+				headers['Referer'] = referer;
 			}
 
-			cloudscraper.request(
-				{
-					method: 'GET',
-                	url:args,
-                	encoding: null,
-                },
+			var options = {
+			    url: download,
+			    method: 'GET',
+			    headers: headers,
+			    encoding: null
+			}
+
+			cloudscraper.request(options,
                 function(err, response, rbody) {
                 	if (err)
                 	{
@@ -105,10 +84,6 @@ function handleRequest(req, response)
 						fs.writeFile('./import_me/' + filename, rbody, null, function(err, w, b) { if (err == null) console.log('wrote %s', filename); });
 				}
 			);
-
-			/*request(args)
-			.pipe(fs.createWriteStream('./import_me/' + filename))
-			.on('close', function() { console.log('wrote %s', filename); });*/
 
 			if (body.length > 0)
 				fs.writeFile('./import_me/' + txtfilename, body, 'utf8', function(err, w, b) { if (err == null) console.log('wrote %s', txtfilename); });
