@@ -4,9 +4,11 @@ var crypto = require('crypto');
 
 var cloudscraper;
 var request;
+var Entities;
 try {
 	request = require('request');
 	cloudscraper = require('cloudscraper');
+	Entities = require('html-entities').AllHtmlEntities;
 }
 catch (e) {
 	console.log('some libraries were not found - did you run install_modules.bat or install_modules.sh?');
@@ -14,6 +16,7 @@ catch (e) {
 	return;
 }
 
+const entities = new Entities();
 const PORT = 14007;
 
 function handleRequest(req, response)
@@ -61,6 +64,7 @@ function handleRequest(req, response)
 			console.log('args: %s', args);
 			//console.log('body:\n%s', body);
 
+			body = entities.decode(body);
 			body = body.replace(/,/g, "\r\n");
 
 			var filename = args.replace(/\.\./, '').replace(/^.*[\\\/]/, '').replace(/\?.+/, '');

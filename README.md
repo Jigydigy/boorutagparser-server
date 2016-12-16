@@ -12,7 +12,7 @@ Saves requests from https://github.com/jetboom/boorutagparser as file/tag list p
 2. [Download and extract the master](https://github.com/JetBoom/boorutagparser-server/archive/master.zip) somewhere.
 3. Run install_modules.bat once
 4. Run boorutagparser-server.bat. Keep it open.
-5. The [web addon](github.com/jetboom/boorutagparser) button for downloading images will now work.
+5. The [web addon](https://github.com/jetboom/boorutagparser) button for downloading images will now work.
 
 You can also just use "npm install boorutagparser-server" if you prefer.
 
